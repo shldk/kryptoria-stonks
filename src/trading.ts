@@ -1,10 +1,10 @@
 import { AxiosResponse } from 'axios';
-import Http from './http';
+import { Http } from './http';
 
 export const Resources = ['binaryCode', 'bioSynth', 'kryptoOre', 'metaSpice', 'uniShard'] as const;
 export type Resource = typeof Resources[number];
 
-export interface Trade {
+export type Trade = {
 	id: number;
 	sendResource: Resource;
 	sendAmount: number;
@@ -12,13 +12,19 @@ export interface Trade {
 	receiveAmount: number;
 }
 
-class Trading {
-	Resources = {
+export type TradeCriteria = {
+	send: readonly Resource[];
+	receive: readonly Resource[];
+	maxRatio: number;
+}
+
+export class Trading {
+	static Resources = {
 		all: () => Resources,
 		except: (...excludedResources: Array<Resource>) => Resources.filter(resource => !excludedResources.includes(resource))
 	}
 
-	async getActiveTrades(): Promise<Array<Trade>> {
+	static async getActiveTrades(): Promise<Array<Trade>> {
 		return await Http.api.get('/trades', {
 			params: {
 				page: 1,
@@ -27,12 +33,10 @@ class Trading {
 		}).then((d: AxiosResponse) => d?.data?.pageData)
 	}
 
-	async acceptTrade(trade: Trade) {
+	static async acceptTrade(trade: Trade) {
 		return await Http.api.post(
 			'/trade/accept',
 			{ id: trade.id }
 		).then(() => console.info(`Bought "${trade.sendAmount} ${trade.sendResource}" for "${trade.receiveAmount} ${trade.receiveResource}"`));
 	}
 }
-
-export default new Trading();

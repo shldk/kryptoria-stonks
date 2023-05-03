@@ -1,25 +1,8 @@
+import { Config } from './config';
+import { Trade, Trading } from './trading';
+import { Http } from './http';
+
 require('dotenv').config();
-
-import Http from './http';
-import Trading, { Resource, Trade } from './trading';
-
-const criterias: Array<TradeCriteria> = [
-	{
-		send: ['bioSynth'],
-		receive: Trading.Resources.except('bioSynth'),
-		maxRatio: 995 / 650
-	},
-	{
-		send: ['metaSpice'],
-		receive: Trading.Resources.except('bioSynth'),
-		maxRatio: 995 / 995
-	},
-	{
-		send: ['kryptoOre', 'uniShard'],
-		receive: ['kryptoOre', 'uniShard'],
-		maxRatio: 500 / 995
-	}
-];
 
 (async function main() {
 	await Http.init();
@@ -27,7 +10,7 @@ const criterias: Array<TradeCriteria> = [
 
 	setInterval(() => {
 		checkTrades();
-	}, 10000);
+	}, Config.pollingRate);
 })()
 
 async function checkTrades(): Promise<Trade[]> {
@@ -40,7 +23,7 @@ async function checkTrades(): Promise<Trade[]> {
 }
 
 function matchesCriteria(trade: Trade): boolean { // Receive and send are backwards for trades and criterias
-	return criterias.some(criteria => {
+	return Config.criterias.some(criteria => {
 		if (!criteria.send.includes(trade.receiveResource)) {
 			return false;
 		}
@@ -51,10 +34,4 @@ function matchesCriteria(trade: Trade): boolean { // Receive and send are backwa
 
 		return trade.receiveAmount / trade.sendAmount <= criteria.maxRatio;
 	})
-}
-
-type TradeCriteria = {
-	send: readonly Resource[];
-	receive: readonly Resource[];
-	maxRatio: number;
 }
