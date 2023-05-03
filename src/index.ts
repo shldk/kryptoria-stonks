@@ -1,8 +1,8 @@
+require('dotenv').config();
+
 import { Config } from './config';
 import { Trade, Trading } from './trading';
 import { Http } from './http';
-
-require('dotenv').config();
 
 (async function main() {
 	await Http.init();
