@@ -1,4 +1,4 @@
-import { AxiosResponse } from "axios";
+import { AxiosResponse } from 'axios';
 import Http from './http';
 
 const Web3 = require('web3');
@@ -14,9 +14,8 @@ class Auth {
 	async loadToken(): Promise<string> {
 		const now = Date.now();
 		const signature = await this.getSignature(now);
-		const { token } = await this.getUserData(signature, now);
 
-		return token;
+		return await this.getUserData(signature, now);
 	}
 
 	private async getSignature(timestamp: number): Promise<string> {
@@ -25,12 +24,12 @@ class Auth {
 		return await web3.eth.sign(`${address}${timestamp}POST/kryptoria/api/v1/wallet/login`, address);
 	}
 
-	private async getUserData(signature: string, timestamp: number): Promise<UserData> {
-		return await Http.axios.post('https://auth.kryptoria.io/kryptoria/api/v1/wallet/login', {
+	private async getUserData(signature: string, timestamp: number): Promise<string> {
+		return await Http.publicApi.post('/wallet/login', {
 			address,
 			signature,
 			timestamp
-		}).then((d: AxiosResponse) => d.data);
+		}).then((d: AxiosResponse) => d.data.token);
 	}
 }
 

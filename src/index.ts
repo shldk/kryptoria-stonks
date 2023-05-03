@@ -1,7 +1,7 @@
 require('dotenv').config();
 
 import Http from './http';
-import Trading, { Resource, Trade } from "./trading";
+import Trading, { Resource, Trade } from './trading';
 
 const criterias: Array<TradeCriteria> = [
 	{
@@ -58,4 +58,3 @@ type TradeCriteria = {
 	receive: readonly Resource[];
 	maxRatio: number;
 }
-

@@ -19,7 +19,7 @@ class Trading {
 	}
 
 	async getActiveTrades(): Promise<Array<Trade>> {
-		return await Http.axios.get('https://auth.kryptoria.io/kryptoria/api/v1/trades', {
+		return await Http.api.get('/trades', {
 			params: {
 				page: 1,
 				pageSize: 50,
@@ -28,8 +28,8 @@ class Trading {
 	}
 
 	async acceptTrade(trade: Trade) {
-		return await Http.axios.post(
-			'https://auth.kryptoria.io/kryptoria/api/v1/trade/accept',
+		return await Http.api.post(
+			'/trade/accept',
 			{ id: trade.id }
 		).then(() => console.info(`Bought "${trade.sendAmount} ${trade.sendResource}" for "${trade.receiveAmount} ${trade.receiveResource}"`));
 	}

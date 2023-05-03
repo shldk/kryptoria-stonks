@@ -1,20 +1,31 @@
 import Auth from './auth';
-import { AxiosResponse } from 'axios';
+import { AxiosResponse, HttpStatusCode } from 'axios';
+
+const axios = require('axios').default;
+
+const baseURL: string = 'https://auth.kryptoria.io/kryptoria/api/v1';
 
 class Http {
-	axios = require('axios').default;
+	publicApi = axios.create({
+		baseURL
+	});
+
+	api = axios.create({
+		baseURL,
+		withCredentials: true
+	});
 
 	async init() {
 		await this.loadAuthorization();
 
-		this.axios.interceptors.response.use((response: AxiosResponse) => response, async (e: any) => {
-			const originalRequest = e.request;
-			if (e.response?.status === 403 && !originalRequest._retry) {
-				originalRequest._retry = true;
-
+		this.api.interceptors.response.use((response: AxiosResponse) => response, async (e: any) => {
+			const config = e.config;
+			if (e.response?.status === HttpStatusCode.Unauthorized && !config._retry) {
+				config._retry = true;
+				config.headers.delete('Authorization');
 				await this.loadAuthorization();
 
-				return this.axios(originalRequest);
+				return this.api(config);
 			}
 			return Promise.reject(e);
 		});
@@ -23,10 +34,8 @@ class Http {
 	private async loadAuthorization() {
 		const token = await Auth.loadToken();
 
-		this.axios.withCredentials = true;
-		this.axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+		return this.api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
 	}
 }
 
 export default new Http();
-
